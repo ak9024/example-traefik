@@ -1,0 +1,94 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      # Enable Docker provider
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # Enable dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=true"  # Note: In production, secure this with proper authentication
+      # Entrypoints configuration
+      - "--entrypoints.web.address=:80"
+      # Uncomment for HTTPS
+      # - "--entrypoints.websecure.address=:443"
+      # Basic logging
+      - "--log.level=INFO"
+    ports:
+      - "80:80"     # HTTP
+      # Uncomment for HTTPS
+      # - "443:443"   # HTTPS
+      - "8080:8080" # Dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      # Uncomment the following lines if you want to use TLS
+      # - "./config/traefik.yml:/etc/traefik/traefik.yml:ro"
+      # - "./config/certificates:/etc/traefik/certificates:ro"
+    networks:
+      - traefik-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    networks:
+      - traefik-network
+    labels:
+      # Enable Traefik for this container
+      - "traefik.enable=true"
+      # Route requests with 'localhost' hostname to this service
+      - "traefik.http.routers.nginx.rule=Host(`localhost`)"
+      # Use the 'web' entrypoint (port 80)
+      - "traefik.http.routers.nginx.entrypoints=web"
+      # Forward traffic to container port 80
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: unless-stopped
+    volumes:
+      # Mount Docker socket to allow Dozzle to access container logs
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      # Mount dozzle configuration
+      - "./dozzle/data:/data"
+    environment:
+      DOZZLE_AUTH_PROVIDER: simple
+    networks:
+      - traefik-network
+    labels:
+      # Enable Traefik for this container
+      - "traefik.enable=true"
+      # Route requests with 'dozzle.localhost' hostname to this service
+      - "traefik.http.routers.dozzle.rule=Host(`dozzle.localhost`)"
+      # Use the 'web' entrypoint (port 80)
+      - "traefik.http.routers.dozzle.entrypoints=web"
+      # Forward traffic to container port 8080 where Dozzle web interface runs
+      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+
+  api:
+    container_name: api
+    build:
+      dockerfile: ./apps/api/Dockerfile
+    restart: unless-stopped
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      # Route configuration
+      - "traefik.http.routers.api.rule=Host(`api.localhost`)"  # Change to your domain
+      - "traefik.http.routers.api.entrypoints=web"
+      # Service configuration
+      - "traefik.http.services.api.loadbalancer.server.port=1323"
+      # Uncomment for HTTPS
+      # - "traefik.http.routers.api.rule=Host(`myservice.localhost`)"
+      # - "traefik.http.routers.api.entrypoints=websecure"
+      # - "traefik.http.routers.api.tls=true"
+
+networks:
+  traefik-network:
+    driver: bridge

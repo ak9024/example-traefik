@@ -1,0 +1,6 @@
+users:
+    admin:
+        email: adiatma.mail@gmail.com
+        name: Adiatma Kamarudin
+        password: $2a$11$xVv69mHAT51DWs6Aiv.IeOmS1aiAIkRcgmRzf9QIn1jBu1cD/q0X6
+        filter:
