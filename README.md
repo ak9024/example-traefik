@@ -1,5 +1,15 @@
 # example-traefik
 
+```
+.
+├── ./apps/
+│   └── ./apps/api
+├── ./dozzle/
+│   └── ./dozzle/data/
+│       └── ./dozzle/data/users.yaml
+└── ./docker-compose.yaml
+```
+
 ```shell
 docker compose up -d
 ```
@@ -8,10 +18,3 @@ docker compose up -d
 # generate dozzle users
 docker run amir20/dozzle generate admin --password secret --email adiatma.mail@gmail.com --name "Adiatma Kamarudin" > dozzle/data/users.yml
 ```
-
-### Services
-
-- traefik as a loadbalancer
-- nginx
-- dozzle for container logs
-- api (go apps)
