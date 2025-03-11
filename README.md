@@ -21,7 +21,8 @@
 ├── loki
 │   └── config.yaml
 └── promtail
-    └── config.yaml```
+    └── config.yaml
+```
 
 ```shell
 docker compose up -d
