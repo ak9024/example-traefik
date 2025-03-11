@@ -1,14 +1,27 @@
 # example-traefik
 
 ```
-.
-├── ./apps/
-│   └── ./apps/api
-├── ./dozzle/
-│   └── ./dozzle/data/
-│       └── ./dozzle/data/users.yaml
-└── ./docker-compose.yaml
-```
+├── README.md
+├── apps
+│   └── api
+│       ├── Dockerfile
+│       ├── go.mod
+│       ├── go.sum
+│       └── main.go
+├── docker-compose.yaml
+├── dozzle
+│   └── data
+│       └── users.yml
+├── grafana
+│   └── provisioning
+│       ├── dashboards
+│       │   └── dashboard.yaml
+│       └── datasources
+│           └── datasource.yaml
+├── loki
+│   └── config.yaml
+└── promtail
+    └── config.yaml```
 
 ```shell
 docker compose up -d
